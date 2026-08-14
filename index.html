@@ -1,294 +1,300 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Queena 記事本詢問</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Queena 商品詢問</title>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+*{box-sizing:border-box}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      font-family: Arial, "Noto Sans TC", sans-serif;
-      background: linear-gradient(180deg,#fff8df,#fff1bd);
-      color: #4b3820;
-    }
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:22px;
+  font-family:Arial,"Noto Sans TC",sans-serif;
+  background:linear-gradient(180deg,#fff8df,#fff0ba);
+  color:#4b3517;
+}
 
-    .card {
-      width: 100%;
-      max-width: 430px;
-      background: #fff;
-      border-radius: 24px;
-      padding: 38px 25px;
-      text-align: center;
-      box-shadow: 0 12px 35px rgba(90,65,20,.12);
-    }
+.card{
+  width:100%;
+  max-width:430px;
+  background:#fff;
+  padding:30px 22px;
+  border-radius:24px;
+  text-align:center;
+  box-shadow:0 10px 35px rgba(0,0,0,.08);
+}
 
-    .icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
+.brand{
+  font-size:13px;
+  letter-spacing:2px;
+  color:#a98742;
+  margin-bottom:12px;
+}
 
-    h1 {
-      font-size: 25px;
-      margin: 0 0 15px;
-    }
+h1{
+  font-size:23px;
+  line-height:1.45;
+  margin:0 0 25px;
+}
 
-    #message {
-      font-size: 17px;
-      line-height: 1.7;
-      color: #75644e;
-    }
+button{
+  width:100%;
+  border:0;
+  border-radius:15px;
+  padding:17px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:12px;
+}
 
-    #product {
-      display: none;
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 15px;
-      background: #fff7d9;
-      font-size: 18px;
-      font-weight: bold;
-    }
-  </style>
+.buy{
+  background:#f4c84f;
+  color:#3f2d0d;
+}
+
+.ask{
+  background:#fff6d9;
+  color:#5b4728;
+  border:1px solid #ead28d;
+}
+
+#status{
+  margin-top:20px;
+  font-size:15px;
+  line-height:1.7;
+  color:#806e55;
+}
+
+.done{
+  font-size:45px;
+  margin-bottom:12px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="card">
 
-  <div id="icon" class="icon">♡</div>
-
-  <h1 id="title">正在確認 LINE 身分</h1>
-
-  <div id="message">
-    請稍候一下 ♡
+  <div class="brand">
+    QUEENA SELECT
   </div>
 
-  <div id="product"></div>
+  <div id="main">
+
+    <h1 id="product">
+      商品載入中...
+    </h1>
+
+    <button
+      class="buy"
+      onclick="sendInquiry('我要買')">
+      🛒 我要買
+    </button>
+
+    <button
+      class="ask"
+      onclick="sendInquiry('我想了解')">
+      💬 我想了解
+    </button>
+
+    <div id="status"></div>
+
+  </div>
 
 </div>
 
-
 <script>
 
-const LIFF_ID = '2011084503-x54CcAEe';
+const LIFF_ID =
+  '2011084503-x54CcAEe';
 
-/*
-  ↓↓↓ 這裡等等要放你的 GAS 接收網址 ↓↓↓
-*/
 const GAS_URL =
   'https://script.google.com/macros/s/AKfycbz3cGUC6hsUJfhKJJ-kCznEaYtwiBKcTPpBO-EK40ZB7q0cp4sHjhUye-zN4p1bcQ8s/exec';
 
-
-function showError(text) {
-
-  document.getElementById('icon').textContent = '⚠️';
-  document.getElementById('title').textContent = '無法送出';
-  document.getElementById('message').textContent = text;
-
-}
+let productName = '';
+let profile = null;
 
 
-async function start() {
+// =========================
+// 啟動
+// =========================
+async function start(){
 
-  try {
+  try{
 
-    document.getElementById('message').textContent =
-      '步驟 1：正在連接 LINE…';
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
 
-    // ① 初始化 LIFF
+    productName =
+      params.get('n') || '';
+
+    // LIFF redirect 備援
+    const state =
+      params.get('liff.state') || '';
+
+    if(!productName && state){
+
+      const decoded =
+        decodeURIComponent(state);
+
+      const q =
+        decoded.indexOf('?');
+
+      if(q >= 0){
+
+        const sp =
+          new URLSearchParams(
+            decoded.substring(q + 1)
+          );
+
+        productName =
+          sp.get('n') || '';
+      }
+    }
+
+    if(!productName){
+
+      document.getElementById('product')
+        .textContent =
+        '找不到商品資料';
+
+      return;
+    }
+
+    document.getElementById('product')
+      .textContent =
+      productName;
+
+
+    // 初始化 LINE
     await liff.init({
       liffId: LIFF_ID
     });
 
 
-    document.getElementById('message').textContent =
-      '步驟 2：LINE 已連接';
-
-
-    // ② 讀取網址
-    const path =
-      window.location.pathname
-        .split('/')
-        .filter(Boolean);
-
-    /*
-      GitHub Pages 路徑會是：
-
-      /queena-note/CHANEL/1
-
-      所以：
-      path[0] = queena-note
-      path[1] = CHANEL
-      path[2] = 1
-    */
-
-    let noteName = '';
-let actionCode = '';
-
-const urlParams =
-  new URLSearchParams(window.location.search);
-
-noteName =
-  urlParams.get('n') || '';
-
-actionCode =
-  urlParams.get('a') || '';
-
-    // ③ 備援：如果 LINE 把資料放進 liff.state
-    const params =
-      new URLSearchParams(window.location.search);
-
-    const liffState =
-      params.get('liff.state');
-
-    if ((!noteName || !actionCode) && liffState) {
-
-      const statePath =
-        decodeURIComponent(liffState)
-          .split('/')
-          .filter(Boolean);
-
-      if (statePath.length >= 2) {
-
-        noteName =
-          statePath[statePath.length - 2];
-
-        actionCode =
-          statePath[statePath.length - 1];
-
-      }
-
-    }
-
-
-    if (!noteName || !actionCode) {
-
-      showError(
-        '找不到這篇記事本的商品資料'
-      );
-
-      return;
-
-    }
-
-
-    const action =
-      actionCode === '2'
-        ? '我要買'
-        : '想了解';
-
-
-    document.getElementById('product').style.display =
-      'block';
-
-    document.getElementById('product').textContent =
-      action + '｜' + noteName;
-
-
-    // ④ 如果尚未登入
-    if (!liff.isLoggedIn()) {
-
-      document.getElementById('message').textContent =
-        '正在登入 LINE…';
+    if(!liff.isLoggedIn()){
 
       liff.login({
-        redirectUri: window.location.href
+        redirectUri:
+          window.location.href
       });
 
       return;
-
     }
 
 
-    // ⑤ 取得客人的 LINE 資料
-    document.getElementById('message').textContent =
-      '步驟 3：正在取得 LINE 身分…';
-
-    const profile =
+    profile =
       await liff.getProfile();
 
 
-    document.getElementById('message').textContent =
-      '步驟 4：正在送出…';
+  }catch(err){
 
+    document.getElementById('status')
+      .textContent =
+      'LINE 身分確認失敗，請重新開啟。';
 
-    /*
-      下一步我們會在這裡
-      傳送到 GAS
-    */
-
-    document.getElementById('message').textContent =
-  '正在送出...';
-
-const payload = new URLSearchParams();
-
-payload.append(
-  'type',
-  'noteInquiry'
-);
-
-payload.append(
-  'lineName',
-  profile.displayName || ''
-);
-
-payload.append(
-  'lineUserId',
-  profile.userId || ''
-);
-
-payload.append(
-  'title',
-  noteName
-);
-
-payload.append(
-  'action',
-  action
-);
-
-const response = await fetch(
-  GAS_URL,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type':
-        'application/x-www-form-urlencoded;charset=UTF-8'
-    },
-    body: payload.toString()
   }
-);
 
-const result = await response.text();
-
-document.getElementById('icon').textContent = '✅';
-
-document.getElementById('title').textContent =
-  '已收到';
-
-document.getElementById('message').innerHTML =
-  'Queena 已收到囉 ♡<br>' +
-  '我會再跟你聯絡';
+}
 
 
-  } catch (error) {
+// =========================
+// 客人按按鈕
+// =========================
+async function sendInquiry(action){
 
-    console.error(error);
+  try{
 
-    showError(
-      error && error.message
-        ? error.message
-        : String(error)
+    if(!profile){
+
+      document.getElementById('status')
+        .textContent =
+        '正在確認 LINE 身分，請稍候再按一次 ♡';
+
+      return;
+    }
+
+
+    document.getElementById('status')
+      .textContent =
+      '正在送出...';
+
+
+    const payload =
+      new URLSearchParams();
+
+    payload.append(
+      'type',
+      'noteInquiry'
     );
+
+    payload.append(
+      'lineName',
+      profile.displayName || ''
+    );
+
+    payload.append(
+      'lineUserId',
+      profile.userId || ''
+    );
+
+    payload.append(
+      'title',
+      productName
+    );
+
+    payload.append(
+      'action',
+      action
+    );
+
+
+    await fetch(
+      GAS_URL,
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':
+          'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body:
+          payload.toString()
+      }
+    );
+
+
+    document.getElementById('main')
+      .innerHTML =
+
+      '<div class="done">✅</div>' +
+
+      '<h1>已收到</h1>' +
+
+      '<div id="status">' +
+      'Queena 已收到你的「' +
+      action +
+      '」♡<br><br>' +
+      productName +
+      '</div>';
+
+
+  }catch(err){
+
+    document.getElementById('status')
+      .textContent =
+      '送出失敗，請再試一次。';
 
   }
 
