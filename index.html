@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queena 記事本詢問</title>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      background: linear-gradient(180deg,#fff8df,#fff1bd);
+      color: #4b3820;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 430px;
+      background: #fff;
+      border-radius: 24px;
+      padding: 38px 25px;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(90,65,20,.12);
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin: 0 0 15px;
+    }
+
+    #message {
+      font-size: 17px;
+      line-height: 1.7;
+      color: #75644e;
+    }
+
+    #product {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 15px;
+      background: #fff7d9;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div id="icon" class="icon">♡</div>
+
+  <h1 id="title">正在確認 LINE 身分</h1>
+
+  <div id="message">
+    請稍候一下 ♡
+  </div>
+
+  <div id="product"></div>
+
+</div>
+
+
+<script>
+
+const LIFF_ID = '2011084503-x54CcAEe';
+
+/*
+  ↓↓↓ 這裡等等要放你的 GAS 接收網址 ↓↓↓
+*/
+const GAS_URL =
+  'https://script.google.com/macros/s/AKfycbz3cGUC6hsUJfhKJJ-kCznEaYtwiBKcTPpBO-EK40ZB7q0cp4sHjhUye-zN4p1bcQ8s/exec';
+
+
+function showError(text) {
+
+  document.getElementById('icon').textContent = '⚠️';
+  document.getElementById('title').textContent = '無法送出';
+  document.getElementById('message').textContent = text;
+
+}
+
+
+async function start() {
+
+  try {
+
+    document.getElementById('message').textContent =
+      '步驟 1：正在連接 LINE…';
+
+    // ① 初始化 LIFF
+    await liff.init({
+      liffId: LIFF_ID
+    });
+
+
+    document.getElementById('message').textContent =
+      '步驟 2：LINE 已連接';
+
+
+    // ② 讀取網址
+    const path =
+      window.location.pathname
+        .split('/')
+        .filter(Boolean);
+
+    /*
+      GitHub Pages 路徑會是：
+
+      /queena-note/CHANEL/1
+
+      所以：
+      path[0] = queena-note
+      path[1] = CHANEL
+      path[2] = 1
+    */
+
+    let noteName = '';
+    let actionCode = '';
+
+    if (path.length >= 3) {
+
+      noteName =
+        decodeURIComponent(path[path.length - 2]);
+
+      actionCode =
+        path[path.length - 1];
+
+    }
+
+
+    // ③ 備援：如果 LINE 把資料放進 liff.state
+    const params =
+      new URLSearchParams(window.location.search);
+
+    const liffState =
+      params.get('liff.state');
+
+    if ((!noteName || !actionCode) && liffState) {
+
+      const statePath =
+        decodeURIComponent(liffState)
+          .split('/')
+          .filter(Boolean);
+
+      if (statePath.length >= 2) {
+
+        noteName =
+          statePath[statePath.length - 2];
+
+        actionCode =
+          statePath[statePath.length - 1];
+
+      }
+
+    }
+
+
+    if (!noteName || !actionCode) {
+
+      showError(
+        '找不到這篇記事本的商品資料'
+      );
+
+      return;
+
+    }
+
+
+    const action =
+      actionCode === '2'
+        ? '我要買'
+        : '想了解';
+
+
+    document.getElementById('product').style.display =
+      'block';
+
+    document.getElementById('product').textContent =
+      action + '｜' + noteName;
+
+
+    // ④ 如果尚未登入
+    if (!liff.isLoggedIn()) {
+
+      document.getElementById('message').textContent =
+        '正在登入 LINE…';
+
+      liff.login({
+        redirectUri: window.location.href
+      });
+
+      return;
+
+    }
+
+
+    // ⑤ 取得客人的 LINE 資料
+    document.getElementById('message').textContent =
+      '步驟 3：正在取得 LINE 身分…';
+
+    const profile =
+      await liff.getProfile();
+
+
+    document.getElementById('message').textContent =
+      '步驟 4：正在送出…';
+
+
+    /*
+      下一步我們會在這裡
+      傳送到 GAS
+    */
+
+    document.getElementById('icon').textContent = '✅';
+
+    document.getElementById('title').textContent =
+      'LINE 身分取得成功';
+
+    document.getElementById('message').textContent =
+      '您好 ' +
+      (profile.displayName || '') +
+      ' ♡';
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(
+      error && error.message
+        ? error.message
+        : String(error)
+    );
+
+  }
+
+}
+
+
+start();
+
+</script>
+
+</body>
+</html>
