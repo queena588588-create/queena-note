@@ -132,18 +132,16 @@ async function start() {
     */
 
     let noteName = '';
-    let actionCode = '';
+let actionCode = '';
 
-    if (path.length >= 3) {
+const urlParams =
+  new URLSearchParams(window.location.search);
 
-      noteName =
-        decodeURIComponent(path[path.length - 2]);
+noteName =
+  urlParams.get('n') || '';
 
-      actionCode =
-        path[path.length - 1];
-
-    }
-
+actionCode =
+  urlParams.get('a') || '';
 
     // ③ 備援：如果 LINE 把資料放進 liff.state
     const params =
