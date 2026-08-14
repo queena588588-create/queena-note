@@ -226,15 +226,58 @@ actionCode =
       傳送到 GAS
     */
 
-    document.getElementById('icon').textContent = '✅';
-
-    document.getElementById('title').textContent =
-      'LINE 身分取得成功';
-
     document.getElementById('message').textContent =
-      '您好 ' +
-      (profile.displayName || '') +
-      ' ♡';
+  '正在送出...';
+
+const payload = new URLSearchParams();
+
+payload.append(
+  'type',
+  'noteInquiry'
+);
+
+payload.append(
+  'lineName',
+  profile.displayName || ''
+);
+
+payload.append(
+  'lineUserId',
+  profile.userId || ''
+);
+
+payload.append(
+  'title',
+  noteName
+);
+
+payload.append(
+  'action',
+  action
+);
+
+const response = await fetch(
+  GAS_URL,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type':
+        'application/x-www-form-urlencoded;charset=UTF-8'
+    },
+    body: payload.toString()
+  }
+);
+
+const result = await response.text();
+
+document.getElementById('icon').textContent = '✅';
+
+document.getElementById('title').textContent =
+  '已收到';
+
+document.getElementById('message').innerHTML =
+  'Queena 已收到囉 ♡<br>' +
+  '我會再跟你聯絡';
 
 
   } catch (error) {
