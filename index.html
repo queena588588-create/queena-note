@@ -247,6 +247,25 @@ async function start(){
 // =========================
 // 客人按按鈕
 // =========================
+  let buyQty = 1;
+
+function showQuantity() {
+  document.getElementById('quantityBox').style.display = 'block';
+}
+
+function changeQty(change) {
+  buyQty += change;
+
+  if (buyQty < 1) {
+    buyQty = 1;
+  }
+
+  document.getElementById('qty').textContent = buyQty;
+}
+
+function sendBuy() {
+  sendInquiry('我要買', buyQty);
+}
 async function sendInquiry(action){
 
   try{
