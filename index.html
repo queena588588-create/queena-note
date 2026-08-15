@@ -189,7 +189,26 @@ async function start(){
       new URLSearchParams(
         window.location.search
       );
+const buttonParam = params.get('b') || 'buy,ask';
 
+const selectedButtons =
+  buttonParam.split(',');
+
+if (selectedButtons.includes('buy')) {
+  document.getElementById('buyBtn').style.display = 'block';
+}
+
+if (selectedButtons.includes('ask')) {
+  document.getElementById('askBtn').style.display = 'block';
+}
+
+if (selectedButtons.includes('interest')) {
+  document.getElementById('interestBtn').style.display = 'block';
+}
+
+if (selectedButtons.includes('contact')) {
+  document.getElementById('contactBtn').style.display = 'block';
+}
     productName =
       params.get('n') || '';
 
