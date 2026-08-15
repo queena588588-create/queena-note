@@ -312,7 +312,10 @@ async function sendInquiry(action, quantity = ''){
       'action',
       action
     );
-
+payload.append(
+  'quantity',
+  quantity
+);
 
     await fetch(
       GAS_URL,
