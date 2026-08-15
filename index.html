@@ -94,10 +94,11 @@ button{
     <h1 id="product">
       商品載入中...
     </h1>
-
-    <button
+<button
+  id="buyBtn"
   class="buy"
-  onclick="showQuantity()">
+  onclick="showQuantity()"
+  style="display:none;">
   🛒 我要買
 </button>
 
@@ -136,10 +137,28 @@ button{
 </div>
 
     <button
-      class="ask"
-      onclick="sendInquiry('我想了解')">
-      💬 我想了解
-    </button>
+  id="askBtn"
+  class="ask"
+  onclick="sendInquiry('我想了解')"
+  style="display:none;">
+  💬 我想了解
+</button>
+
+<button
+  id="interestBtn"
+  class="ask"
+  onclick="sendInquiry('我有興趣')"
+  style="display:none;">
+  🙋 我有興趣
+</button>
+
+<button
+  id="contactBtn"
+  class="ask"
+  onclick="sendInquiry('請聯絡我')"
+  style="display:none;">
+  📩 請聯絡我
+</button>
 
     <div id="status"></div>
 
