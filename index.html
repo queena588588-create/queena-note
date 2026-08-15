@@ -96,10 +96,44 @@ button{
     </h1>
 
     <button
-      class="buy"
-      onclick="sendInquiry('我要買')">
-      🛒 我要買
+  class="buy"
+  onclick="showQuantity()">
+  🛒 我要買
+</button>
+
+<div id="quantityBox" style="display:none; margin-top:16px;">
+
+  <div style="font-size:16px; margin-bottom:10px;">
+    選擇數量
+  </div>
+
+  <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
+
+    <button onclick="changeQty(-1)"
+      style="width:55px; margin:0;">
+      −
     </button>
+
+    <span id="qty"
+      style="font-size:24px; font-weight:bold;">
+      1
+    </span>
+
+    <button onclick="changeQty(1)"
+      style="width:55px; margin:0;">
+      ＋
+    </button>
+
+  </div>
+
+  <button
+    class="buy"
+    onclick="sendBuy()"
+    style="margin-top:15px;">
+    確認我要買
+  </button>
+
+</div>
 
     <button
       class="ask"
