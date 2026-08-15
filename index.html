@@ -266,7 +266,7 @@ function changeQty(change) {
 function sendBuy() {
   sendInquiry('我要買', buyQty);
 }
-async function sendInquiry(action){
+async function sendInquiry(action, quantity = ''){
 
   try{
 
